@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: base_datos
+
+  # PostgreSQL real (docker compose up -d). Para ejecutar sin instalar nada: --spring.profiles.active=embedded
+  datasource:
+    # options=-c lock_timeout=5s : ninguna sentencia espera un lock más de 5 s (=> SQLSTATE 55P03, reintentable)
+    url: jdbc:postgresql://localhost:5432/banco?options=-c%20lock_timeout%3D5s
+    username: banco
+    password: banco
+    hikari:
+      maximum-pool-size: 20
+      auto-commit: false          # el framework controla COMMIT/ROLLBACK explícitamente
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+
+  jpa:
+    open-in-view: false           # evita transacciones/conexiones abiertas durante el render de la vista
+    hibernate:
+      ddl-auto: validate          # el esquema lo gobierna Flyway, Hibernate solo valida
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50          # inserciones/updates en lote
+          time_zone: UTC
+        order_inserts: true
+        order_updates: true
+        connection:
+          provider_disables_autocommit: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+banco:
+  reintentos:
+    maximos: 5
+    espera-inicial-ms: 20
+    espera-maxima-ms: 500
+
+logging:
+  level:
+    com.example.base_datos: INFO
+    # Descomentar para ver begin/commit/rollback del framework:
+    # org.springframework.orm.jpa.JpaTransactionManager: DEBUG

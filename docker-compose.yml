@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: banco-postgres
+    environment:
+      POSTGRES_DB: banco
+      POSTGRES_USER: banco
+      POSTGRES_PASSWORD: banco
+    ports:
+      - "5432:5432"
+    command:
+      # Durabilidad: estos valores son los de producción (no desactivar fsync)
+      - "postgres"
+      - "-c"
+      - "fsync=on"
+      - "-c"
+      - "synchronous_commit=on"
+      - "-c"
+      - "full_page_writes=on"
+      - "-c"
+      - "wal_level=replica"
+      - "-c"
+      - "log_lock_waits=on"
+      - "-c"
+      - "deadlock_timeout=1s"
+    volumes:
+      - banco-data:/var/lib/postgresql/data
+
+volumes:
+  banco-data:
